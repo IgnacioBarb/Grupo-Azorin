@@ -8,10 +8,10 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mi_clave_secreta'
-app.config['MYSQL_HOST'] = 'ignacioBU.mysql.pythonanywhere-services.com'
-app.config['MYSQL_USER'] = 'ignacioBU'
-app.config['MYSQL_PASSWORD'] = '922001Ignacio'
-app.config['MYSQL_DB'] = 'ignacioBU$flask_login'
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'flask_login'
 
 csrf = CSRFProtect(app)
 db = MySQL(app)
@@ -38,12 +38,13 @@ class User(UserMixin):
 
 
 class Registro():
-    def __init__(self, nombre, hora, fecha, accion, lugar) -> None:
+    def __init__(self, nombre, hora, fecha, accion, lugar, ubicazion) -> None:
         self.nombre = nombre
         self.hora = hora
         self.fecha = fecha
         self.accion = accion
         self.lugar = lugar
+        self.ubicazion = ubicazion
 
 
 class Obra():
@@ -126,11 +127,11 @@ def get_register(db, month, year):
 
         cursor = db.connection.cursor()
         cursor.execute(
-            f"SELECT nombre, hora, DATE_FORMAT(fecha, '%d-%m-%Y'), accion, lugar FROM acciones_usuario WHERE YEAR(fecha) = {year} AND MONTH(fecha) = {month};")
+            f"SELECT nombre, hora, DATE_FORMAT(fecha, '%d-%m-%Y'), accion, lugar, ubicazion FROM acciones_usuario WHERE YEAR(fecha) = {year} AND MONTH(fecha) = {month};")
         result = cursor.fetchall()
         if result != None:
             for i in result:
-                registros.append(Registro(i[0], i[1], i[2], i[3], i[4]))
+                registros.append(Registro(i[0], i[1], i[2], i[3], i[4], i[5]))
             return registros
         else:
             return None
@@ -222,12 +223,12 @@ def update_obra(db, id, name):
         raise Exception(ex)
 
 
-def add_acciones(db, username, id, accion, lugar):
+def add_acciones(db, username, id, accion, lugar, ubicazion):
     try:
 
         cursor = db.connection.cursor()
         cursor.execute(
-            f"INSERT INTO acciones_usuario(nombre, hora, fecha, accion, lugar) VALUES ('{username}', NOW(),NOW(), '{accion}', '{lugar}')")
+            f"INSERT INTO acciones_usuario(nombre, hora, fecha, accion, lugar,ubicazion) VALUES ('{username}', NOW(),NOW(), '{accion}', '{lugar}','{ubicazion}')")
         if accion == 'terminar trabajo':
             cursor.execute(
                 f"UPDATE usuarios SET accion='', lugar='' WHERE id={id}")
@@ -459,23 +460,23 @@ def process_form():
     user = get_by_id(db, id)
     if accion == 'Iniciar trabajo':
         lugar = request.form['lugar']
-        print(request.form['ubicacion'])
-        add_acciones(db, user.username, id, accion, lugar)
+        ubicazion = request.form['ubicacion']
+        add_acciones(db, user.username, id, accion, lugar, ubicazion)
         return redirect(url_for('trabajndo'))
 
     if accion == 'Terminar trabajo':
-        print(request.form['ubicacion'])
-        add_acciones(db, user.username, id, accion, user.lugar)
+        ubicazion = request.form['ubicacion']
+        add_acciones(db, user.username, id, accion, user.lugar, ubicazion)
         return redirect(url_for('dashboard'))
 
     if accion == 'Iniciar descanso':
-        print(request.form['ubicacion'])
-        add_acciones(db, user.username, id, accion, user.lugar)
+        ubicazion = request.form['ubicacion']
+        add_acciones(db, user.username, id, accion, user.lugar, ubicazion)
         return redirect(url_for('descansando'))
 
     if accion == 'Terminar descanso':
-        print(request.form['ubicacion'])
-        add_acciones(db, user.username, id, accion, user.lugar)
+        ubicazion = request.form['ubicacion']
+        add_acciones(db, user.username, id, accion, user.lugar, ubicazion)
         return redirect(url_for('trabajndo'))
 
 
