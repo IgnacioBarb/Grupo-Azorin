@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <style>
+        .my-element {
+            margin-top: 80px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        function mostrarHora() {
+            // Obtenemos la hora actual del sistema
+            var fecha = new Date();
+            var horas = fecha.getHours();
+            var minutos = fecha.getMinutes();
+            var segundos = fecha.getSeconds();
+
+            // Agregamos un cero delante de los números menores a 10
+            horas = horas < 10 ? "0" + horas : horas;
+            minutos = minutos < 10 ? "0" + minutos : minutos;
+            segundos = segundos < 10 ? "0" + segundos : segundos;
+
+            // Creamos la cadena con la hora
+            var horaActual = horas + ":" + minutos + ":" + segundos;
+
+            // Mostramos la hora en el elemento HTML
+            document.getElementById("hora").innerHTML = horaActual;
+        }
+
+        // Actualizamos la hora cada segundo
+        setInterval(mostrarHora, 1);
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light " style="background-color: #f2f2f2;">
+        <div class="container-fluid mt-2">
+            <div class="col text-end">
+                <div class="d-inline-block">
+                    <form method="POST" action="/logout">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-secondary">Cerrar sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container text-center">
+        <div class="col-9 mx-auto my-element">
+            <img class="mb-4" src="../static/img/logo.jpeg" alt="" width="150" height="150">
+            <h1>Bienvenido/a {{ current_user.username }}</h1>
+            <h1><span id="hora"></span></h1>
+            <br>
+            <form method="POST" action="/acciones-usuario">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="tipo" value="Iniciar trabajo">
+                <div class="form-floating mt-2">
+                    <select class="form-select" name="lugar">
+                        {% for obra in obras %}
+                        <option value="{{obra.nombre}}">{{obra.nombre}}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="floatingSelect">Elige lugar</label>
+                </div>
+                <br>
+                <button id="iniciar-trabajo-btn" class="w-100 btn btn-lg btn-primary" type="submit">Iniciar
+                    trabajo</button>
+                <input type="hidden" id="ubicacion-input" name="ubicacion">
+            </form>
+        </div>
+    </div>
+    <script>
+        if (!!navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                            //Si el navegador entrega los datos de geolocalizacion los imprimimos
+                            function (position) {
+                                var latitud = position.coords.latitude;
+                                var longitud = position.coords.longitude;
+                                document.getElementById("ubicacion-input").value = latitud + "," + longitud;
+                            },
+                            //Si no los entrega manda un alerta de error
+                            function () {
+                                window.alert("nav no permitido");
+                            }
+                    );
+                }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous">
+        </script>
+</body>
+
+</html>

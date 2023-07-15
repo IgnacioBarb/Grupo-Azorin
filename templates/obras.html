@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+</head>
+
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mx-auto text-center">
+                <img src="../static/img/logo.jpeg" alt="" width="150" height="150">
+                <h1>Lugares</h1>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-primary alert-dismissible" role="alert">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <div style="max-height: 300px; overflow-y: auto; margin-top: 5px;">
+                    <table class="table">
+                        <thead style="position: sticky; top: 0; background-color: #f2f2f2;">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for obra in obras %}
+                            <tr>
+                                <td>{{obra.nombre}}</td>
+
+                                <td>
+
+                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#{{obra.id}}Modal">
+                                        Editar
+                                    </button>
+
+                                    <form method="POST" action="/delete-obra"
+                                        onclick="return confirm('Estas seguro que quieres eliminar al obra {{obra.nombre}}')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="id" value="{{obra.id}}">
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+                <form method="POST" action="/add-obras">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" name="nombre" placeholder="Obra">
+                                <label for="username">Nombre de la obra</label>
+                            </div>
+                        </div>
+                        <div class="col">
+
+                            <button type="submit" class="w-100 btn btn-lg btn-primary mt-2">Añadir lugares</button>
+                        </div>
+                    </div>
+                </form>
+                <form method="POST" action="/atras" class="float-end">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary float-end fixed-top m-3"
+                        style="width: 100px;">Atrás</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% for obra in obras %}
+    <div class="modal fade" id="{{obra.id}}Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="/editar-obra">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="name" placeholder="Obra">
+                            <label for="username">Nuevo nombre</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="id" value="{{obra.id}}">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="guardar-nombre">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous">
+        </script>
+
+</body>
+
+</html>
