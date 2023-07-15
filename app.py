@@ -1,18 +1,17 @@
-from flask import request
 from flask import Flask, render_template, url_for, request, redirect, flash, session, send_file
 from flask_mysqldb import MySQL
 from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
+from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin
 import pandas as pd
 from datetime import datetime
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mi_clave_secreta'
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'flask_login'
+app.config['MYSQL_HOST'] = 'ignacioBU.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER'] = 'ignacioBU'
+app.config['MYSQL_PASSWORD'] = '922001Ignacio'
+app.config['MYSQL_DB'] = 'ignacioBU$flask_login'
 
 csrf = CSRFProtect(app)
 db = MySQL(app)
@@ -55,13 +54,13 @@ class Obra():
 
 def user_login(db, name, password):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"SELECT id, username, password, tipo FROM usuarios WHERE username = '{name}'")
         result = cursor.fetchone()
         cursor.close()
-        
+
         if result != None:
             return User(result[0], result[1], User.check_password(
                 result[2], password), result[3], None, None)
@@ -88,7 +87,7 @@ def get_by_id(db, id):
 def get_all_users(db):
     try:
         users = []
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"SELECT id, username, password,tipo FROM usuarios")
@@ -106,7 +105,7 @@ def get_all_users(db):
 def get_all_obras(db):
     try:
         obras = []
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"SELECT id, nombre FROM lugares")
@@ -124,7 +123,7 @@ def get_all_obras(db):
 def get_register(db, month, year):
     try:
         registros = []
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"SELECT nombre, hora, DATE_FORMAT(fecha, '%d-%m-%Y'), accion, lugar FROM acciones_usuario WHERE YEAR(fecha) = {year} AND MONTH(fecha) = {month};")
@@ -141,11 +140,11 @@ def get_register(db, month, year):
 
 def insert_user(db, username, password, tipo):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"INSERT INTO usuarios (username, password, tipo) VALUES ('{username}', '{password}', '{tipo}')")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -154,11 +153,11 @@ def insert_user(db, username, password, tipo):
 
 def insert_obra(db, nombre):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"INSERT INTO lugares (nombre) VALUES ('{nombre}')")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -166,7 +165,7 @@ def insert_obra(db, nombre):
 
 
 def user_exists(db, username):
-    
+
     cursor = db.connection.cursor()
     cursor.execute(f"SELECT id FROM usuarios WHERE username='{username}'")
     result = cursor.fetchone()
@@ -175,10 +174,10 @@ def user_exists(db, username):
 
 def user_delete(db, id):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(f"DELETE FROM usuarios WHERE id={id}")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -187,10 +186,10 @@ def user_delete(db, id):
 
 def obra_delete(db, id):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(f"DELETE FROM lugares WHERE id='{id}'")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -199,11 +198,11 @@ def obra_delete(db, id):
 
 def update_user(db, id, username, password, tipo):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"UPDATE usuarios SET username='{username}', password='{password}', tipo={tipo} WHERE id={id}")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -212,11 +211,11 @@ def update_user(db, id, username, password, tipo):
 
 def update_obra(db, id, name):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"UPDATE lugares SET nombre='{name}' WHERE id={id}")
-        conn.commit()
+        db.connection.commit()
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -225,18 +224,19 @@ def update_obra(db, id, name):
 
 def add_acciones(db, username, id, accion, lugar):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(
             f"INSERT INTO acciones_usuario(nombre, hora, fecha, accion, lugar) VALUES ('{username}', NOW(),NOW(), '{accion}', '{lugar}')")
         if accion == 'terminar trabajo':
             cursor.execute(
                 f"UPDATE usuarios SET accion='', lugar='' WHERE id={id}")
-            conn.commit()
+            db.connection.commit()
         else:
             cursor.execute(
                 f"UPDATE usuarios SET accion='{accion}', lugar='{lugar}' WHERE id={id}")
-            conn.commit()
+            db.connection.commit()
+
         return True
     except Exception as ex:
         db.connection.rollback()
@@ -245,7 +245,7 @@ def add_acciones(db, username, id, accion, lugar):
 
 def get_year(db):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(f"SELECT DISTINCT YEAR(fecha) FROM acciones_usuario;")
         result = cursor.fetchall()
@@ -260,7 +260,7 @@ def get_year(db):
 
 def get_month(db):
     try:
-        
+
         cursor = db.connection.cursor()
         cursor.execute(f"SELECT DISTINCT MONTH(fecha) FROM acciones_usuario;")
         result = cursor.fetchall()
@@ -281,8 +281,8 @@ def descarga_registro(tabla, month, year):
     df = pd.DataFrame(registros,
                       columns=['nombre', 'hora', 'fecha', 'accion','lugar'])
     df.to_excel(
-        f'./static/registros/registro-{month}-{year}.xlsx', index=False)
-    path = f'./static/registros/registro-{month}-{year}.xlsx'
+        f'/home/ignacioBU/Grupo-Azorin/static/registros/registro-{month}-{year}.xlsx', index=False)
+    path = f'/home/ignacioBU/Grupo-Azorin/static/registros/registro-{month}-{year}.xlsx'
     return path
 
 

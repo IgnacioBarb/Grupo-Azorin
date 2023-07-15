@@ -60,9 +60,9 @@
             <form method="POST" action="/acciones-usuario">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="tipo" value="Iniciar descanso">
-                <input type="hidden" id="ubicacion-input" name="ubicacion">
+                <input type="hidden" id="ubicacion" name="ubicacion">
                 <button id="iniciar-descanso-btn" class="w-100 btn btn-lg btn-primary" type="submit">Iniciar
-                    descanso</button>
+                    descanso</button> 
             </form>
         </div>
     </div>
@@ -75,6 +75,9 @@
                                 var latitud = position.coords.latitude;
                                 var longitud = position.coords.longitude;
                                 document.getElementById("ubicacion-input").value = latitud + "," + longitud;
+                                document.getElementById("ubicacion").value = latitud + "," + longitud;
+                                console.log(latitud)
+                                console.log(longitud)
                             },
                             //Si no los entrega manda un alerta de error
                             function () {

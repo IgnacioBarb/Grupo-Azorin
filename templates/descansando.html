@@ -68,6 +68,8 @@
                                 var latitud = position.coords.latitude;
                                 var longitud = position.coords.longitude;
                                 document.getElementById("ubicacion-input").value = latitud + "," + longitud;
+                                console.log(latitud)
+                                console.log(longitud)
                             },
                             //Si no los entrega manda un alerta de error
                             function () {
